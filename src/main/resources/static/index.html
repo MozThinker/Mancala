@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!--    libs for stomp and sockjs-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <!--    end libs for stomp and sockjs-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+
+
+</head>
+<body>
+
+<body class="Content">
+<div class="Info">
+    <H1>Mancala</H1>
+    <H2>Board Game</H2>
+</div>
+<input id="login" placeholder="Login For Playing">
+<button onclick="create_game()">Login</button>
+<input id="game_id" placeholder="Game id to connect"></input>
+<button onclick="connectToSpecificGame()">Connet by game Id</button>
+<button onclick="connectToRandom()">Connect to random game</button>
+<div class="GameContainer">
+    <div class="TopUI">
+        <div class="UI-Element Player1Score Player P1 Active">Player 1</div>
+        <div class="UI-Element Turn">Player 1 Turn</div>
+        <div class="UI-Element Player2Score Player P2">Player 2</div>
+    </div>
+    <div class="Spawner">
+
+    </div>
+    <div class="Board">
+        <div class="Kalaha-left Pit" id="13">0</div>
+        <div class="Pit P1 Valid" id="0_0">6</div>
+        <div class="Pit P1 Valid" id="0_1">6</div>
+        <div class="Pit P1 Valid" id="0_2">6</div>
+        <div class="Pit P1 Valid" id="0_3">6</div>
+        <div class="Pit P1 Valid" id="0_4">6</div>
+        <div class="Pit P1 Valid" id="0_5">6</div>
+        <div class="Kalaha-right Pit" id="6">0</div>
+        <div class="Pit P2" id="1_5">6</div>
+        <div class="Pit P2" id="1_4">6</div>
+        <div class="Pit P2" id="1_3">6</div>
+        <div class="Pit P2" id="1_2">6</div>
+        <div class="Pit P2" id="1_1">6</div>
+        <div class="Pit P2" id="1_0">6</div>
+    </div>
+</div>
+
+</body>
+<script src="js/script.js"></script>
+<script src="js/socket_js.js"></script>
+</body>
+</html>
+
