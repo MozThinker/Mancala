@@ -20,9 +20,9 @@ public class Game {
     private boolean southTurn;
 
     private String winnerMessage;
-    private int offsetPlayerPlayer2;
-    private List<Integer> pitListPlayer1;
-    private List<Integer> pitListPlayer2;
+    //private int offsetPlayerPlayer2;
+    //private List<Integer> pitListPlayer1;
+    //private List<Integer> pitListPlayer2;
     private int stonesKalahaSouth;
     private int stonesKalahaNorth;
 

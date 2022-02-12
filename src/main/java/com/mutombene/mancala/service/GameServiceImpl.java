@@ -180,6 +180,17 @@ public class GameServiceImpl implements GameService {
         return lastPit;
     }
 
+    private void captureIfLastPitIsOwnEmptyPit(final int index, Game game) {
+        if (pitContainsOneStone(index, game) && isARegularPit(index, game) && landsInPlayersOwnPit(index, game)) {
+            int kalaha = game.isSouthTurn() ? getIndexKalahaSouth(game) : getIndexKalahaNorth(game);
+            int capturedStones = getStonesInPit(index, game) + getStonesInPit(oppositePit(index, game), game);
+
+            setStonesInPit(kalaha, getStonesInPit(kalaha, game) + capturedStones, game);
+            emptyPit(index, game);
+            emptyPit(oppositePit(index, game), game);
+        }
+    }
+
     private int getStonesInPit(final int index, Game game) {
         return game.getPitList().get(index);
     }
@@ -294,16 +305,7 @@ public class GameServiceImpl implements GameService {
         return !game.isSouthTurn();
     }
 
-    private void captureIfLastPitIsOwnEmptyPit(final int index, Game game) {
-        if (pitContainsOneStone(index, game) && isARegularPit(index, game) && landsInPlayersOwnPit(index, game)) {
-            int kalaha = game.isSouthTurn() ? getIndexKalahaSouth(game) : getIndexKalahaNorth(game);
-            int capturedStones = getStonesInPit(index, game) + getStonesInPit(oppositePit(index, game), game);
 
-            setStonesInPit(kalaha, getStonesInPit(kalaha, game) + capturedStones, game);
-            emptyPit(index, game);
-            emptyPit(oppositePit(index, game), game);
-        }
-    }
 
     private boolean pitContainsOneStone(final int index, Game game) {
         return getStonesInPit(index, game) == 1;
