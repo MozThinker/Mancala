@@ -8,7 +8,6 @@ import com.mutombene.mancala.model.Game;
 import com.mutombene.mancala.model.GamePlay;
 import com.mutombene.mancala.model.Player;
 import com.mutombene.mancala.storage.GameStorage;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,6 @@ import static com.mutombene.mancala.model.GameStatus.NEW;
 
 @Service
 @RequiredArgsConstructor
-@Data
 @Slf4j
 public class GameServiceImpl implements GameService {
 
@@ -115,7 +113,7 @@ public class GameServiceImpl implements GameService {
         int pitListIndex = isSouthTurn ? chosenIndex : chosenIndex + getOffsetPlayerNorth(game);
 
         if (isPitEmpty(pitListIndex, game))
-            System.out.println("Empty pit");
+            throw new InvalidPlayerMoveException("Empty pit");
         else
             play(pitListIndex, isSouthTurn, game);
 
@@ -135,27 +133,6 @@ public class GameServiceImpl implements GameService {
             indexNorth++;
         }
         game.setRowNorth(intNorthArray);
-
-        log.info("                                       ");
-        log.info("                                       ");
-        log.info("                                       ");
-        log.info("Tulipa       {} {}", game.getStonesKalahaNorth(), game.getRowNorth());
-        log.info("MozThinker     {} {}", game.getRowSouth(), game.getStonesKalahaSouth());
-        log.info("                                       ");
-        if (isGameOver(game)) {
-            game.setWinnerMessage(getWinnerMessage(game));
-            log.info(game.getWinnerMessage());
-            game.setStatus(FINISHED);
-        } else {
-            if (game.isSouthTurn()) {
-                log.info("MozThinker's Turn");
-            } else {
-                log.info("Tulipa's Turn");
-            }
-        }
-
-        log.info("                                       ");
-        log.info("                                       ");
 
         return game;
     }

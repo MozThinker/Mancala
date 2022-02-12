@@ -7,6 +7,8 @@ var boardRawNorth;
 var activePlayer = 0;
 var pits;
 
+var winner;
+
 var p1Score = document.getElementsByClassName("Player1Score")[0];
 var p2Score = document.getElementsByClassName("Player2Score")[0];
 var TurnUI = document.getElementsByClassName("Turn")[0];
@@ -157,8 +159,10 @@ function displayResponse(data){
 
     SetActivePlayerAndPitsToValid(data);
 
-    if(data.winnerMessage != null){
+    winner = data.winnerMessage;
+    if(winner != null){
         DisableAllPits();
         alert("Winner is "+data.winnerMessage);
+        winner = null;
     }
 }
