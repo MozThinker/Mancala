@@ -8,6 +8,7 @@ import com.mutombene.mancala.model.Game;
 import com.mutombene.mancala.model.GamePlay;
 import com.mutombene.mancala.model.Player;
 import com.mutombene.mancala.storage.GameStorage;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class GameServiceImpl implements GameService {
     private static final String PLAYER_1_WINNER = "WinP1";
     private static final String PLAYER_2_WINNER = "WinP2";
 
+    //Creates a new game
     public Game createGame(Player player1) {
         List<Integer> pitList = new ArrayList<>();
         Game game = new Game();
@@ -64,6 +66,7 @@ public class GameServiceImpl implements GameService {
         return game;
     }
 
+    //Connect to a specific existing game by providing the Player2 details and the Game ID to join
     public Game connectToGame(Player player2, String gameId) throws InvalidParamException, InvalidGameException {
 
         if (!GameStorage.getInstance().getGames().containsKey(gameId)) {
@@ -84,6 +87,7 @@ public class GameServiceImpl implements GameService {
         return game;
     }
 
+    //Connect to any existing randomly game by providing the Player2
     public Game connectToRandomGame(Player player2) throws NotFoundException {
 
         Game game = GameStorage.getInstance().getGames().values().stream()
@@ -97,6 +101,7 @@ public class GameServiceImpl implements GameService {
         return game;
     }
 
+    //The GamePlay
     public Game gamePlay(GamePlay gamePlay) throws NotFoundException, InvalidGameException, InvalidPlayerMoveException {
 
         if (!GameStorage.getInstance().getGames().containsKey(gamePlay.getGameId()))
@@ -133,6 +138,11 @@ public class GameServiceImpl implements GameService {
             indexNorth++;
         }
         game.setRowNorth(intNorthArray);
+
+        if (isGameOver(game)) {
+            game.setWinnerMessage(getWinnerMessage(game));
+            game.setStatus(FINISHED);
+        }
 
         return game;
     }
@@ -223,7 +233,7 @@ public class GameServiceImpl implements GameService {
         return getTotalStonesInPitsSouth(game) == 0 || getTotalStonesInPitsNorth(game) == 0;
     }
 
-    private int getTotalStonesInPitsSouth(Game game) {
+    public int getTotalStonesInPitsSouth(Game game) {
         int sum = 0;
         int bound = getIndexKalahaSouth(game);
         for (int i = 0; i < bound; i++) {
@@ -233,7 +243,7 @@ public class GameServiceImpl implements GameService {
         return sum;
     }
 
-    private int getTotalStonesInPitsNorth(Game game) {
+    public int getTotalStonesInPitsNorth(Game game) {
         int sum = 0;
         int bound = getIndexKalahaNorth(game);
         for (int i = getIndexKalahaSouth(game) + 1; i < bound; i++) {

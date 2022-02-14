@@ -8,7 +8,10 @@ import com.mutombene.mancala.model.Game;
 import com.mutombene.mancala.model.GamePlay;
 import com.mutombene.mancala.model.Player;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * @author mutombene
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GameServiceImplTest {
 
     final static List<Integer> PIT_LIST_AFTER_SINGLE_MOVE_P1 = Arrays.asList(6, 6, 6, 6, 6, 6, 0, 0, 7, 7, 7, 7, 7, 1);
@@ -39,6 +43,7 @@ public class GameServiceImplTest {
     GameServiceImpl gameService;
     Player player1, player2;
     Game game;
+    String gameId;
     GamePlay gamePlayInt, gamePlay;
     List<Integer> expectedList = Arrays.asList(6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 0);
     List<Integer> expectedListGamePlay = Arrays.asList(6, 6, 6, 6, 6, 6, 0, 0, 7, 7, 7, 7, 7, 1);
@@ -57,12 +62,13 @@ public class GameServiceImplTest {
         gamePlay = new GamePlay();
 
         game = gameService.createGame(player1);
-        String gameId = game.getGameId();
+        gameId = game.getGameId();
 
         game = gameService.connectToGame(player2, gameId);
     }
 
     @Test
+    @Order(1)
     void createGame() {
         game = new Game();
         game = gameService.createGame(player1);
@@ -72,12 +78,13 @@ public class GameServiceImplTest {
         assertThat(game.getPitList()).isEqualTo(expectedList);
     }
 
-   @Test
+    @Test
+    @Order(2)
     void connectToGame() throws InvalidParamException, InvalidGameException {
-       game = new Game();
-       game = gameService.createGame(player1);
+        game = new Game();
+        game = gameService.createGame(player1);
 
-       Game gameInstance2 = gameService.connectToGame(player2, game.getGameId());
+        Game gameInstance2 = gameService.connectToGame(player2, game.getGameId());
 
         assertThat(gameInstance2.getPlayerNorth()).isEqualTo(player2);
         assertThat(gameInstance2.getStatus()).isEqualTo(IN_PROGRESS);
@@ -85,21 +92,24 @@ public class GameServiceImplTest {
     }
 
     @Test
+    @Order(3)
     void failedConnectToGameIdNotExist() {
-        assertThatThrownBy(()->gameService.connectToGame(player2,"invalidddd"))
+        assertThatThrownBy(() -> gameService.connectToGame(player2, "invalidddd"))
                 .isInstanceOf(InvalidParamException.class).hasMessage("Game with provided ID doesn't exist");
     }
 
     @Test
+    @Order(4)
     void failedConnectToGameInvalidId() throws NotFoundException {
 
         String invalidGameId = game.getGameId();
         game.setStatus(FINISHED);
-        assertThatThrownBy(()->gameService.connectToGame(player2,invalidGameId))
+        assertThatThrownBy(() -> gameService.connectToGame(player2, invalidGameId))
                 .isInstanceOf(InvalidGameException.class).hasMessage("Game is not valid anymore!");
     }
 
     @Test
+    @Order(5)
     void connectToRandomGame() throws NotFoundException {
         game = new Game();
         game = gameService.createGame(player1);
@@ -113,94 +123,117 @@ public class GameServiceImplTest {
     }
 
     @Test
+    @Order(6)
     void gamePlay() throws NotFoundException, InvalidGameException, InvalidPlayerMoveException {
         game = new Game();
         game = gameService.createGame(player1);
         String gameId = game.getGameId();
-        Game gameInstance2 = gameService.connectToRandomGame(player2);
 
         gamePlayInt.setGameId(gameId);
         gamePlayInt.setSouthTurn(false);
         gamePlayInt.setChosenIndex(0);
 
-        //Before GamePlay
         assertThat(game.getPitList()).isEqualTo(expectedList);
 
-        Game gamePlay = gameService.gamePlay(gamePlayInt);
+        gameService.gamePlay(gamePlayInt);
 
-        //After GamePlay
         assertThat(game.getPitList()).isEqualTo(expectedListGamePlay);
         assertThat(game.isSouthTurn()).isFalse();
-
-        System.out.println("Pit List: "+gamePlay.getPitList());
 
     }
 
     @Test
-    void gameInProgress(){
+    @Order(7)
+    void gameInProgress() {
         assertThat(game.getStatus()).isEqualTo(IN_PROGRESS);
     }
 
     @Test
-    void makeSingleMovePlayer1(){
-        gameService.makeMove(7,game);
+    @Order(8)
+    void amakingMoveGameOver() throws InvalidPlayerMoveException, NotFoundException, InvalidGameException {
+        game.setPitList(PIT_LIST_BEFORE_GAMEOVER);
+        game.setSouthTurn(true);
+        gamePlay.setChosenIndex(0);
+        gamePlay.setGameId(gameId);
+        gamePlay.setSouthTurn(true);
+        gameService.gamePlay(gamePlay);
+
+        assertThat(game.getPitList()).isEqualTo(PIT_LIST_AFTER_GAMEOVER);
+        assertThat(game.getWinnerMessage()).isNotNull();
+        assertThat(game.getStatus()).isEqualTo(FINISHED);
+    }
+
+    @Test
+    @Order(9)
+    void makeSingleMovePlayer1() {
+        gameService.makeMove(7, game);
         assertThat(game.getPitList()).isEqualTo(PIT_LIST_AFTER_SINGLE_MOVE_P1);
     }
 
     @Test
-    void  makeMultipleMovesPlayer1(){
-        gameService.makeMove(7,game);
-        gameService.makeMove(8,game);
+    @Order(10)
+    void makeMultipleMovesPlayer1() {
+        gameService.makeMove(7, game);
+        gameService.makeMove(8, game);
         assertThat(game.getPitList()).isEqualTo(PIT_LIST_AFTER_MULTIPLE_MOVES_P1);
     }
 
     @Test
-    void makeSingleMovePlayer2(){
-        gameService.makeMove(0,game);
+    @Order(11)
+    void makeSingleMovePlayer2() {
+        gameService.makeMove(0, game);
         assertThat(game.getPitList()).isEqualTo(PIT_LIST_AFTER_SINGLE_MOVE_P2);
     }
 
     @Test
-    void  makeMultipleMovesPlayer2(){
-        gameService.makeMove(0,game);
-        gameService.makeMove(1,game);
+    @Order(12)
+    void makeMultipleMovesPlayer2() {
+        gameService.makeMove(0, game);
+        gameService.makeMove(1, game);
         assertThat(game.getPitList()).isEqualTo(PIT_LIST_AFTER_MULTIPLE_MOVES_P2);
     }
 
     @Test
+    @Order(13)
     void getIndexKalahaSouth() {
         assertThat(gameService.getIndexKalahaSouth(game)).isEqualTo(6);
     }
 
     @Test
+    @Order(14)
     void getIndexKalahaNorth() {
         assertThat(gameService.getIndexKalahaNorth(game)).isEqualTo(13);
     }
 
     @Test
+    @Order(15)
     void isGameOver() {
-        game.setPitList(modifyPitList(game.getPitList(),0,6,0));
+        game.setPitList(modifyPitList(game.getPitList(), 0, 6, 0));
         assertThat(gameService.isGameOver(game));
     }
 
     @Test
+    @Order(16)
     void getOffsetPlayerNorth() {
         assertThat(gameService.getOffsetPlayerNorth(game)).isEqualTo(7);
     }
 
     @Test
+    @Order(17)
     void isPitEmpty() {
-        gameService.makeMove(0,game);
-        assertThat(gameService.isPitEmpty(0,game));
+        gameService.makeMove(0, game);
+        assertThat(gameService.isPitEmpty(0, game));
     }
 
     @Test
+    @Order(18)
     void isEmpty() {
-        gameService.makeMove(0,game);
-        assertThat(gameService.isEmpty(0,game));
+        gameService.makeMove(0, game);
+        assertThat(gameService.isEmpty(0, game));
     }
 
     @Test
+    @Order(19)
     void getWinnerMessage() {
         game.setStonesKalahaNorth(36);
         game.setStonesKalahaSouth(36);
@@ -209,8 +242,8 @@ public class GameServiceImplTest {
     }
 
     @Test
-    void isPlayer1Winner(){
-
+    @Order(20)
+    void isPlayer1Winner() {
         game.setStonesKalahaNorth(42);
         game.setStonesKalahaSouth(30);
 
@@ -218,8 +251,8 @@ public class GameServiceImplTest {
     }
 
     @Test
-    void isPlayer2Winner(){
-
+    @Order(21)
+    void isPlayer2Winner() {
         game.setStonesKalahaNorth(22);
         game.setStonesKalahaSouth(50);
 
@@ -227,81 +260,80 @@ public class GameServiceImplTest {
     }
 
     @Test
-    void captureIfLastPitIsOwnEmptyPit(){
-       // gameService
+    @Order(22)
+    void captureIfLastPitIsOwnEmptyPit() {
         game.setPitList(PIT_LIST_BEFORE_CAPTURE);
-
-        gameService.makeMove(9,game);
+        gameService.makeMove(9, game);
         assertThat(game.getPitList()).isEqualTo(PIT_LIST_AFTER_CAPTURE);
     }
 
     @Test
-    void collectLastStonesIfGameIsOver(){
-        // gameService
+    @Order(23)
+    void collectLastStonesIfGameIsOver() {
         game.setPitList(PIT_LIST_BEFORE_GAMEOVER);
-
-        System.out.println("Turn: "+game.isSouthTurn());
         game.setSouthTurn(true);
-        System.out.println("Turn: "+game.isSouthTurn());
-
-        gameService.makeMove(0,game);
+        gameService.makeMove(0, game);
         assertThat(game.getPitList()).isEqualTo(PIT_LIST_AFTER_GAMEOVER);
     }
 
 
     @Test
-    void skipKalahaOpponent(){
-        // gameService
+    @Order(24)
+    void skipKalahaOpponent() {
         game.setPitList(PIT_LIST_BEFORE_SKIP_OPPONENT_KALAHA);
-
-        System.out.println("Turn: "+game.isSouthTurn());
         game.setSouthTurn(true);
-        System.out.println("Turn: "+game.isSouthTurn());
-
-        gameService.makeMove(5,game);
+        gameService.makeMove(5, game);
         assertThat(game.getPitList()).isEqualTo(PIT_LIST_AFTER_SKIP_OPPONENT_KALAHA);
     }
 
     @Test
-    void skipKalahaOpponentNorth(){
+    @Order(25)
+    void skipKalahaOpponentNorth() {
         game.setPitList(PIT_LIST_BEFORE_SKIP_OPPONENT_KALAHA_NORTH);
-
-        System.out.println("Turn: "+game.isSouthTurn());
         game.setSouthTurn(true);
-        System.out.println("Turn: "+game.isSouthTurn());
-
-        gameService.makeMove(5,game);
+        gameService.makeMove(5, game);
         assertThat(game.getPitList()).isEqualTo(PIT_LIST_AFTER_SKIP_OPPONENT_KALAHA_NORTH);
     }
 
     @Test
-    void throwExceptionMovingEmptyPit(){
+    @Order(26)
+    void throwExceptionMovingEmptyPit() {
 
         gamePlayInt.setGameId(game.getGameId());
         gamePlayInt.setSouthTurn(true);
         game.setSouthTurn(true);
         gamePlayInt.setChosenIndex(1);
-
-
         game.setPitList(PIT_LIST_AFTER_GAMEOVER);
-        assertThatThrownBy(()->gameService.gamePlay(gamePlayInt))
+        assertThatThrownBy(() -> gameService.gamePlay(gamePlayInt))
                 .isInstanceOf(InvalidPlayerMoveException.class).hasMessage("Empty pit");
     }
 
     @Test
+    @Order(27)
     void failedToPlayToGameNotFound() {
         gamePlayInt.setGameId("hbshbhsbhs");
         gamePlayInt.setSouthTurn(true);
         gamePlayInt.setChosenIndex(4);
-
         gamePlayInt.setChosenIndex(1);
-        assertThatThrownBy(()->gameService.gamePlay(gamePlayInt))
+        assertThatThrownBy(() -> gameService.gamePlay(gamePlayInt))
                 .isInstanceOf(NotFoundException.class).hasMessage("Game not found");
     }
 
-    List <Integer> modifyPitList(List<Integer> pitList, int indexStart, int indexEnd, int value){
-        for(int i = indexStart; i<indexEnd; i++){
-            pitList.set(i,value);
+    @Test
+    @Order(28)
+    void getTotalStonesInPitsNorth() {
+        assertThat(gameService.getTotalStonesInPitsNorth(game)).isEqualTo(36);
+    }
+
+    @Test
+    @Order(29)
+    void getTotalStonesInPitsSouth() {
+        assertThat(gameService.getTotalStonesInPitsSouth(game)).isEqualTo(36);
+    }
+
+    List<Integer> modifyPitList(List<Integer> pitList, int indexStart, int indexEnd, int value) {
+        for (int i = indexStart; i < indexEnd; i++) {
+            pitList.set(i, value);
         }
         return pitList;
     }

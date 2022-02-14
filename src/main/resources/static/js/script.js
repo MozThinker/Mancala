@@ -9,8 +9,8 @@ var pits;
 
 var winner;
 
-var p1Score = document.getElementsByClassName("Player1Score")[0];
-var p2Score = document.getElementsByClassName("Player2Score")[0];
+var p1Label = document.getElementsByClassName("Player1Score")[0];
+var p2Label = document.getElementsByClassName("Player2Score")[0];
 var TurnUI = document.getElementsByClassName("Turn")[0];
 var spawner = document.getElementsByClassName("Spawner")[0];
 
@@ -97,8 +97,8 @@ function SetActivePlayerAndPitsToValid(gameState){
     });
 
     // Set the right player active
-    IfTrueAddElseRemoveClass(p1Score, "Active", activePlayer == 0);
-    IfTrueAddElseRemoveClass(p2Score, "Active", activePlayer == 1);
+    IfTrueAddElseRemoveClass(p1Label, "Active", activePlayer == 0);
+    IfTrueAddElseRemoveClass(p2Label, "Active", activePlayer == 1);
 }
 
 function IfTrueAddElseRemoveClass(element, className, condition){
@@ -159,10 +159,12 @@ function displayResponse(data){
 
     SetActivePlayerAndPitsToValid(data);
 
-    winner = data.winnerMessage;
-    if(winner != null){
+    isWinner(data);
+}
+
+function isWinner(data){
+    if(data.winnerMessage != null){
         DisableAllPits();
         alert("Winner is "+data.winnerMessage);
-        winner = null;
     }
 }
