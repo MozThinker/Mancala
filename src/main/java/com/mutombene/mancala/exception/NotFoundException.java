@@ -1,20 +1,19 @@
 package com.mutombene.mancala.exception;
 
+import lombok.Getter;
+
 /**
  * @author mutombene
  */
-public class NotFoundException extends Exception{
+@Getter
+public class NotFoundException extends RuntimeException{
 
-    private String message;
+    private final String message;
 
     public NotFoundException (String message) {
 
         this.message = message;
     }
 
-    public String getMessage() {
-
-        return message;
-    }
 }
 

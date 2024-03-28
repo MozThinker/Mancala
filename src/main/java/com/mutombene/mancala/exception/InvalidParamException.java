@@ -1,18 +1,17 @@
 package com.mutombene.mancala.exception;
 
+import lombok.Getter;
+
 /**
  * @author mutombene
  */
-public class InvalidParamException extends Exception{
-    private String message;
+@Getter
+public class InvalidParamException extends RuntimeException{
+    private final String message;
 
     public InvalidParamException (String message) {
 
         this.message = message;
     }
 
-    public String getMessage() {
-
-        return message;
-    }
 }

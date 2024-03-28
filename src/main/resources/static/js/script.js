@@ -6,6 +6,7 @@ var boardRawSouth;
 var boardRawNorth;
 var activePlayer = 0;
 var pits;
+var winnerAlertShown = false;
 
 var winner;
 
@@ -163,8 +164,9 @@ function displayResponse(data){
 }
 
 function isWinner(data){
-    if(data.winnerMessage != null){
+    if(data.winnerMessage != null && !winnerAlertShown){
         DisableAllPits();
         alert("Winner is "+data.winnerMessage);
+        winnerAlertShown = true;
     }
 }

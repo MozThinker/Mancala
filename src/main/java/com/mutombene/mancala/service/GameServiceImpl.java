@@ -1,21 +1,17 @@
 package com.mutombene.mancala.service;
 
 import com.mutombene.mancala.exception.InvalidGameException;
-import com.mutombene.mancala.exception.InvalidParamException;
 import com.mutombene.mancala.exception.InvalidPlayerMoveException;
 import com.mutombene.mancala.exception.NotFoundException;
 import com.mutombene.mancala.model.Game;
 import com.mutombene.mancala.model.GamePlay;
 import com.mutombene.mancala.model.Player;
 import com.mutombene.mancala.storage.GameStorage;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.mutombene.mancala.model.GameStatus.FINISHED;
 import static com.mutombene.mancala.model.GameStatus.IN_PROGRESS;
@@ -39,25 +35,17 @@ public class GameServiceImpl implements GameService {
     private static final String PLAYER_1_WINNER = "WinP1";
     private static final String PLAYER_2_WINNER = "WinP2";
 
+
     //Creates a new game
     public Game createGame(Player player1) {
-        List<Integer> pitList = new ArrayList<>();
+        List<Integer> pitList = new ArrayList<>(Collections.nCopies(14, PIT_DEFAULT_VALUE));
+        pitList.set(KALAHA_SOUTH_INDEX, KALAHA_DEFAULT_VALUE);
+        pitList.set(KALAHA_NORTH_INDEX, KALAHA_DEFAULT_VALUE);
+
         Game game = new Game();
-
-        for(int i = 0; i<=13; i++){
-            if(i==6 || i==13){
-                pitList.add(KALAHA_DEFAULT_VALUE);
-            }else{
-                pitList.add(PIT_DEFAULT_VALUE);
-            }
-        }
-
         game.setPitList(pitList);
-
         game.setRowSouth(new int[]{0, 6, 6, 6, 6, 6, 6});
         game.setRowNorth(new int[]{6, 6, 6, 6, 6, 6, 0});
-
-
         game.setGameId(UUID.randomUUID().toString());
         game.setPlayerSouth(player1);
         game.setStatus(NEW);
@@ -67,18 +55,10 @@ public class GameServiceImpl implements GameService {
     }
 
     //Connect to a specific existing game by providing the Player2 details and the Game ID to join
-    public Game connectToGame(Player player2, String gameId) throws InvalidParamException, InvalidGameException {
+    public Game connectToGame(Player player2, String gameId) throws InvalidGameException, NotFoundException {
 
-        if (!GameStorage.getInstance().getGames().containsKey(gameId)) {
-            throw new InvalidParamException("Game with provided ID doesn't exist");
-        }
-
-        Game game = GameStorage.getInstance().getGames().get(gameId);
-
-        if (game.getPlayerNorth() != null) {
-            throw new InvalidGameException("Game is not valid anymore!");
-        }
-
+        Game game = getGameById(gameId);
+        validateGameForJoining(game);
         game.setPlayerNorth(player2);
         game.setSouthTurn(false);//
         game.setStatus(IN_PROGRESS);
@@ -104,9 +84,7 @@ public class GameServiceImpl implements GameService {
     //The GamePlay
     public Game gamePlay(GamePlay gamePlay) throws NotFoundException, InvalidGameException, InvalidPlayerMoveException {
 
-        if (!GameStorage.getInstance().getGames().containsKey(gamePlay.getGameId()))
-            throw new NotFoundException("Game not found");
-
+        validateGameExistence(gamePlay);
         Game game = GameStorage.getInstance().getGames().get(gamePlay.getGameId());
         if (game.getStatus().equals(FINISHED)) throw new InvalidGameException("Game is finished");
 
@@ -114,17 +92,30 @@ public class GameServiceImpl implements GameService {
         boolean isSouthTurn = gamePlay.getSouthTurn();
 
         if(game.isSouthTurn()!=isSouthTurn) throw new InvalidPlayerMoveException("Invalid player move");
-
         int pitListIndex = isSouthTurn ? chosenIndex : chosenIndex + getOffsetPlayerNorth(game);
 
         if (isPitEmpty(pitListIndex, game))
             throw new InvalidPlayerMoveException("Empty pit");
-        else
-            play(pitListIndex, isSouthTurn, game);
 
+        play(pitListIndex, isSouthTurn, game);
+        updateGameStatus(game);
+
+        return game;
+    }
+
+    private void updateGameStatus(Game game) {
         game.setStonesKalahaSouth(game.getPitList().get(KALAHA_SOUTH_INDEX));
         game.setStonesKalahaNorth(game.getPitList().get(KALAHA_NORTH_INDEX));
+        updateRows(game);
 
+        if (isGameOver(game)) {
+            game.setWinnerMessage(getWinnerMessage(game));
+            game.setStatus(FINISHED);
+            log.info("The winner is: {}", game.getWinnerMessage());
+        }
+    }
+
+    private void updateRows(Game game) {
         int[] intSouthArray = new int[6];
         int[] intNorthArray = new int[6];
         for (int i = 0; i < 6; i++) {
@@ -138,13 +129,6 @@ public class GameServiceImpl implements GameService {
             indexNorth++;
         }
         game.setRowNorth(intNorthArray);
-
-        if (isGameOver(game)) {
-            game.setWinnerMessage(getWinnerMessage(game));
-            game.setStatus(FINISHED);
-        }
-
-        return game;
     }
 
     public void makeMove(final int index, Game game) {
@@ -335,5 +319,24 @@ public class GameServiceImpl implements GameService {
             return "It's a tie!";
 
         return exceedingStonesSouth > 0 ? PLAYER_2_WINNER : PLAYER_1_WINNER;
+    }
+
+    private Game getGameById(String gameId) throws NotFoundException {
+        if (!GameStorage.getInstance().getGames().containsKey(gameId)) {
+            throw new NotFoundException("Game with provided ID doesn't exist");
+        }
+        return GameStorage.getInstance().getGames().get(gameId);
+    }
+
+    private void validateGameForJoining(Game game) throws InvalidGameException {
+        if (game.getPlayerNorth() != null || game.getStatus() != NEW) {
+            throw new InvalidGameException("This game is not valid for join anymore, please try other!");
+        }
+    }
+
+    private void validateGameExistence(GamePlay gamePlay) throws NotFoundException {
+        if (!GameStorage.getInstance().getGames().containsKey(gamePlay.getGameId())) {
+            throw new NotFoundException("Game not found");
+        }
     }
 }

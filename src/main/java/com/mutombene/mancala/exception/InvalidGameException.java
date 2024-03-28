@@ -1,19 +1,18 @@
 package com.mutombene.mancala.exception;
 
+import lombok.Getter;
+
 /**
  * @author mutombene
  */
-public class InvalidGameException extends Exception{
+@Getter
+public class InvalidGameException extends RuntimeException{
 
-    private String message;
+    private final String message;
 
     public InvalidGameException (String message) {
 
         this.message = message;
     }
 
-    public String getMessage() {
-
-        return message;
-    }
 }

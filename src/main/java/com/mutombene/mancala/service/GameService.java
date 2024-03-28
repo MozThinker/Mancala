@@ -13,7 +13,7 @@ import com.mutombene.mancala.model.Player;
  */
 public interface GameService {
     Game createGame (Player player);
-    Game connectToGame(Player north, String gameId) throws InvalidParamException, InvalidGameException;
+    Game connectToGame(Player north, String gameId) throws InvalidParamException, InvalidGameException, NotFoundException;
     Game connectToRandomGame(Player north) throws NotFoundException;
     Game gamePlay(GamePlay gamePlay) throws NotFoundException, InvalidGameException, InvalidPlayerMoveException;
 }
