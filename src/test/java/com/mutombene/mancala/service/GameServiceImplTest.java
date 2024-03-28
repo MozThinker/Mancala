@@ -49,7 +49,7 @@ public class GameServiceImplTest {
     List<Integer> expectedListGamePlay = Arrays.asList(6, 6, 6, 6, 6, 6, 0, 0, 7, 7, 7, 7, 7, 1);
 
     @BeforeEach
-    void init() throws InvalidParamException, InvalidGameException {
+    void init() throws InvalidGameException, NotFoundException {
         gameService = new GameServiceImpl();
 
         player1 = new Player();
@@ -80,7 +80,7 @@ public class GameServiceImplTest {
 
     @Test
     @Order(2)
-    void connectToGame() throws InvalidParamException, InvalidGameException {
+    void connectToGame() throws InvalidGameException, NotFoundException {
         game = new Game();
         game = gameService.createGame(player1);
 
@@ -95,17 +95,17 @@ public class GameServiceImplTest {
     @Order(3)
     void failedConnectToGameIdNotExist() {
         assertThatThrownBy(() -> gameService.connectToGame(player2, "invalidddd"))
-                .isInstanceOf(InvalidParamException.class).hasMessage("Game with provided ID doesn't exist");
+                .isInstanceOf(NotFoundException.class).hasMessage("Game with provided ID doesn't exist");
     }
 
     @Test
     @Order(4)
-    void failedConnectToGameInvalidId() throws NotFoundException {
+    void failedConnectToGameInvalidId() throws NotFoundException, InvalidGameException {
 
         String invalidGameId = game.getGameId();
         game.setStatus(FINISHED);
         assertThatThrownBy(() -> gameService.connectToGame(player2, invalidGameId))
-                .isInstanceOf(InvalidGameException.class).hasMessage("Game is not valid anymore!");
+                .isInstanceOf(InvalidGameException.class).hasMessage("This game is not valid for join anymore, please try other!");
     }
 
     @Test

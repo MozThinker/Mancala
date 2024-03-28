@@ -59,7 +59,7 @@ First clone the repository:
 
 Install Dependecies:
 
-    mvn clean instal -DskipTests
+    mvn clean install -DskipTests
 
 To build Mancala Core:
 

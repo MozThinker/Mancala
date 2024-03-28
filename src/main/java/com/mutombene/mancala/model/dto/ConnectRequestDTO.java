@@ -1,4 +1,4 @@
-package com.mutombene.mancala.controller.dto;
+package com.mutombene.mancala.model.dto;
 
 import com.mutombene.mancala.model.Player;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.Data;
  * @author mutombene
  */
 @Data
-public class ConnectRequest {
+public class ConnectRequestDTO {
     Player player;
     String gameId;
 }

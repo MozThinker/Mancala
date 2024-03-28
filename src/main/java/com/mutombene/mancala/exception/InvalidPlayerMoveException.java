@@ -1,19 +1,18 @@
 package com.mutombene.mancala.exception;
 
+import lombok.Getter;
+
 /**
  * @author mutombene
  */
-public class InvalidPlayerMoveException extends Exception{
+@Getter
+public class InvalidPlayerMoveException extends RuntimeException{
 
-    private String message;
+    private final String message;
 
     public InvalidPlayerMoveException (String message) {
 
         this.message = message;
     }
 
-    public String getMessage() {
-
-        return message;
-    }
 }
